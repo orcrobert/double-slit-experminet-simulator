@@ -30,3 +30,30 @@
 *.exe
 *.out
 *.app
+
+
+# VSCode specific files
+.vscode/
+
+# User-specific VSCode settings
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+
+# VSCode extensions
+.vscode/extensions/
+
+# Node.js modules (if using any JS for front-end or tools)
+node_modules/
+
+# MacOS-specific
+.DS_Store
+
+# Windows-specific
+Thumbs.db
+
+# Optional for CMake, if you use it
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
