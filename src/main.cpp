@@ -1,6 +1,7 @@
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "simulation.h"
+#include "simulation.h" 
 
 int main() {
     if (!glfwInit()) {
@@ -11,6 +12,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "Quantum Sim Starter", nullptr, nullptr);
     if (!window) {
@@ -21,13 +23,19 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
+    if (glewInit() != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW" << std::endl;
+        return -1;
+    }
+
     QuantumSimulation sim(800, 600);
-    sim.simulateParticles(100);
-    sim.drawPattern();
+    sim.simulateParticles(10000);
 
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        sim.drawPattern();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -35,6 +43,6 @@ int main() {
 
     glfwDestroyWindow(window);
     glfwTerminate();
-    
+
     return 0;
 }
