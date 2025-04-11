@@ -3,17 +3,19 @@
 #include <cmath>
 
 GLuint shaderProgram;
+GLuint slitShaderProgram;
 GLuint VAO, VBO, colorVBO;
 
 QuantumSimulation::QuantumSimulation(float screenWidth, float screenHeight)
     : screenWidth(screenWidth), screenHeight(screenHeight),
     slitSeparation(0.22f), slitWidth(0.03f), distanceToScreen(1.0f) {
-
+        
     initOpenGL();
 }
 
 void QuantumSimulation::initOpenGL() {
     shaderProgram = loadShaders("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+    slitShaderProgram = loadShaders("shaders/slit_vertex_shader.glsl", "shaders/slit_fragment_shader.glsl");
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -117,6 +119,53 @@ void QuantumSimulation::drawPattern() {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+
+    GLuint slitVAO, slitVBO;
+    glGenVertexArrays(1, &slitVAO);
+    glGenBuffers(1, &slitVBO);
+
+    float slitX = -0.5f;
+    float slitHalfWidth = slitWidth / 2.0f;
+    float slitHeight = 0.1f;
+    float separation = slitSeparation;
+
+    std::vector<float> slitVertices = {
+        slitX - slitHalfWidth,  slitHeight, 0.0f,
+        slitX + slitHalfWidth,  slitHeight, 0.0f,
+        slitX + slitHalfWidth, -slitHeight, 0.0f,
+
+        slitX + slitHalfWidth, -slitHeight, 0.0f,
+        slitX - slitHalfWidth, -slitHeight, 0.0f,
+        slitX - slitHalfWidth,  slitHeight, 0.0f,
+
+        slitX + separation - slitHalfWidth,  slitHeight, 0.0f,
+        slitX + separation + slitHalfWidth,  slitHeight, 0.0f,
+        slitX + separation + slitHalfWidth, -slitHeight, 0.0f,
+
+        slitX + separation + slitHalfWidth, -slitHeight, 0.0f,
+        slitX + separation - slitHalfWidth, -slitHeight, 0.0f,
+        slitX + separation - slitHalfWidth,  slitHeight, 0.0f
+    };
+
+    glBindVertexArray(slitVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, slitVBO);
+    glBufferData(GL_ARRAY_BUFFER, slitVertices.size() * sizeof(float), slitVertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glUseProgram(slitShaderProgram);
+    int slitColorLocation = glGetUniformLocation(slitShaderProgram, "slitColor");
+    glUniform4f(slitColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+
+    glDrawArrays(GL_TRIANGLES, 0, 12);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &slitVAO);
+    glDeleteBuffers(1, &slitVBO);
+
+    glUseProgram(shaderProgram);
 }
 
 float QuantumSimulation::calculateProbability(float x, float y) {
