@@ -6,7 +6,8 @@ GLuint shaderProgram;
 GLuint VAO, VBO, colorVBO;
 
 QuantumSimulation::QuantumSimulation(float screenWidth, float screenHeight)
-    : screenWidth(screenWidth), screenHeight(screenHeight) {
+    : screenWidth(screenWidth), screenHeight(screenHeight),
+    slitSeparation(0.22f), slitWidth(0.03f), distanceToScreen(1.0f) {
 
     initOpenGL();
 }
@@ -57,8 +58,7 @@ GLuint QuantumSimulation::loadShaders(const char* vertexPath, const char* fragme
 
 void QuantumSimulation::simulateParticles(int numParticles) {
     interferencePattern.clear();
-    float slitSeparation = 0.3f;
-    float wavelength = 0.01f;
+    float wavelength = 0.05f;
 
     for (int i = 0; i < numParticles; ++i) {
         float x = rand() % (int)screenWidth;
@@ -67,12 +67,21 @@ void QuantumSimulation::simulateParticles(int numParticles) {
         float normalizedX = x / screenWidth * 2.0f - 1.0f;
         float normalizedY = y / screenHeight * 2.0f - 1.0f;
 
-        float x1 = normalizedX + slitSeparation / 2.0f;
-        float x2 = normalizedX - slitSeparation / 2.0f;
+        float d1 = sqrt(pow(normalizedX - slitSeparation / 2.0f, 2) + pow(distanceToScreen - 0.0f, 2));
+        float d2 = sqrt(pow(normalizedX + slitSeparation / 2.0f, 2) + pow(distanceToScreen - 0.0f, 2));
 
-        float phaseDifference = M_PI * slitSeparation * normalizedX / wavelength;
-        float probability = 0.5f + 0.5f * cos(phaseDifference);
+        float delta_d = std::abs(d1 - d2);
 
+        float phi = (2 * M_PI * delta_d) / wavelength;
+        float probability = 0.5f + 0.5f * cos(phi);
+
+        float beta = (M_PI * slitWidth * (normalizedX / distanceToScreen)) / wavelength;
+        float diffractionFactor = 1.0f;
+        if (std::abs(beta) > 1e-6) {
+            diffractionFactor = pow(sinf(beta) / beta, 2);
+        }
+
+        probability *= diffractionFactor;
         probability = std::max(0.0f, std::min(1.0f, probability));
 
         interferencePattern.push_back({normalizedX, normalizedY, probability});

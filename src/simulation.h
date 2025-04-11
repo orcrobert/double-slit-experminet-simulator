@@ -18,6 +18,11 @@ class QuantumSimulation {
 private:
     float screenWidth;
     float screenHeight;
+
+    float slitSeparation;
+    float slitWidth;
+    float distanceToScreen;
+
     std::vector<Particle> interferencePattern;
 
     float calculateProbability(float x, float y);

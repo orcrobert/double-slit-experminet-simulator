@@ -29,7 +29,7 @@ int main() {
     }
 
     QuantumSimulation sim(800, 600);
-    sim.simulateParticles(10000);
+    sim.simulateParticles(100000);
 
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
