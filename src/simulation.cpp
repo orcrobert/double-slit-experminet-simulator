@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include "simulation.h"
+#include <cmath>
 
 GLuint shaderProgram;
 GLuint VAO, VBO, colorVBO;
@@ -56,12 +57,25 @@ GLuint QuantumSimulation::loadShaders(const char* vertexPath, const char* fragme
 
 void QuantumSimulation::simulateParticles(int numParticles) {
     interferencePattern.clear();
+    float slitSeparation = 0.3f;
+    float wavelength = 0.01f;
+
     for (int i = 0; i < numParticles; ++i) {
         float x = rand() % (int)screenWidth;
         float y = rand() % (int)screenHeight;
-        float probability = calculateProbability(x, y);
 
-        interferencePattern.push_back({x / screenWidth * 2.0f - 1.0f, y / screenHeight * 2.0f - 1.0f, probability});
+        float normalizedX = x / screenWidth * 2.0f - 1.0f;
+        float normalizedY = y / screenHeight * 2.0f - 1.0f;
+
+        float x1 = normalizedX + slitSeparation / 2.0f;
+        float x2 = normalizedX - slitSeparation / 2.0f;
+
+        float phaseDifference = M_PI * slitSeparation * normalizedX / wavelength;
+        float probability = 0.5f + 0.5f * cos(phaseDifference);
+
+        probability = std::max(0.0f, std::min(1.0f, probability));
+
+        interferencePattern.push_back({normalizedX, normalizedY, probability});
     }
 }
 
@@ -97,5 +111,5 @@ void QuantumSimulation::drawPattern() {
 }
 
 float QuantumSimulation::calculateProbability(float x, float y) {
-    return static_cast<float>(rand()) / RAND_MAX;
+    return 0.0f;
 }
